@@ -134,7 +134,7 @@ export default function Invoice() {
   // Calculate subtotal from line totals in records
   const subtotal = records?.reduce(
     (acc: number, record) =>
-      acc + parseFloat(record.lineTotal.replace("$", "").replace(",", "")),
+      acc + parseFloat(record.lineTotal.replace(/\$/g, "").replace(/,/g, "")),
     0
   );
 
