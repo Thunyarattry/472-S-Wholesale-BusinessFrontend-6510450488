@@ -12,13 +12,13 @@ RUN npm ci
 # Copy the rest of the application
 COPY . .
 
-# ข้าม ESLint และ TypeScript Errors
-RUN echo "module.exports = { eslint: { ignoreDuringBuilds: true }, typescript: { ignoreBuildErrors: true } };" > next.config.js
+# Create next.config.js explicitly
+RUN echo "module.exports = { images: { domains: ['your-image-domain.com'] }, eslint: { ignoreDuringBuilds: true }, typescript: { ignoreBuildErrors: true } };" > next.config.js
 
 # Build the application
 RUN npm run build
 
-# ลบไฟล์ที่ไม่จำเป็นหลัง build
+# Remove unnecessary files after build
 RUN rm -rf node_modules
 
 # Stage 2: Running the application
@@ -33,16 +33,18 @@ ENV NODE_ENV=production
 COPY package*.json ./
 
 # Install only production dependencies
-RUN npm ci --production
+RUN npm ci --omit=dev
 
 # Copy built application from the builder stage
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/next.config.js ./next.config.js
+COPY --from=builder /app/public ./public
 
 # Add user to run the application without root privileges
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-RUN chown -R nextjs:nodejs /app
+RUN addgroup --system --gid 1001 nodejs \
+    && adduser --system --uid 1001 nextjs \
+    && chown -R nextjs:nodejs /app
+
 USER nextjs
 
 # Expose the port the app will run on
