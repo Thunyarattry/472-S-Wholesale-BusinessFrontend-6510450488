@@ -38,7 +38,10 @@ RUN npm ci --omit=dev
 # Copy built application from the builder stage
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/next.config.js ./next.config.js
-COPY --from=builder /app/public ./public
+COPY --from=builder /app/*.png ./
+COPY --from=builder /app/*.jpg ./
+COPY --from=builder /app/*.jpeg ./
+COPY --from=builder /app/*.svg ./
 
 # Add user to run the application without root privileges
 RUN addgroup --system --gid 1001 nodejs \
